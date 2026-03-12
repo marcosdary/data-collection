@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% set person = res.data if res and res.success else None %}
+
+{% block title %}
+{{ person.familyGuardianName if person else "Pessoa"}} · People Manager
+{% endblock %}
+
+{% block content %}
+
+{% if res.success %}
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+  <a href="/">Pessoas</a>
+  <span class="sep">/</span>
+  <span>{{ person.familyGuardianName }}</span>
+</div>
+
+<!-- Page header -->
+<div class="page-header">
+  <div>
+    <h1>{{ person.familyGuardianName | upper }}</h1>
+    <div class="meta">union_repository.get_by_id_people("{{ person.peopleId[:8] }}…")</div>
+  </div>
+  <div style="display:flex; gap:10px;">
+    <a href="/" class="btn btn-outline">← Voltar</a>
+    <form action="/people/{{ person.peopleId }}/delete" method="POST"
+          onsubmit="return confirm('Confirmar exclusão de {{ person.familyGuardianName }}?')">
+      <button type="submit" class="btn btn-danger">Excluir</button>
+    </form>
+  </div>
+</div>
+
+<div class="detail-layout">
+
+  <!-- Main column -->
+  <div>
+
+    <!-- Dados pessoais -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        DADOS PESSOAIS
+        <span class="card-meta">PeopleReadSchema</span>
+      </div>
+      <div class="card-body">
+        <dl class="dl">
+          <dt>ID</dt>
+          <dd><span class="uuid-chip">{{ person.peopleId }}</span></dd>
+
+          <dt>Responsável</dt>
+          <dd>{{ person.familyGuardianName}}</dd>
+
+          <dt>Idade</dt>
+          <dd>{{ person.age}} anos</dd>
+
+          <dt>Sexo</dt>
+          <dd>
+            {% if person.sex.value == 'MASCULINO' %}
+              <span class="badge badge-m">MASCULINO</span>
+            {% elif person.sex.value == 'FEMININO' %}
+              <span class="badge badge-f">FEMININO</span>
+            {% else %}
+              <span class="badge badge-o">{{ person.sex }}</span>
+            {% endif %}
+          </dd>
+
+          <dt>Raça</dt>
+          <dd>{{ person.race.value }}</dd>
+
+          <dt>Estado civil</dt>
+          <dd>{{ person.maritalStatus.value }}</dd>
+
+          <dt>Ocupação</dt>
+          <dd {% if not person.occupation %}class="null"{% endif %}>
+            {{ person.occupation or 'null' }}
+          </dd>
+
+          <dt>Escolaridade</dt>
+          <dd>{{ person.educationLevel.value }}</dd>
+
+          <dt>Tipo comunidade</dt>
+          <dd>{{ person.communityType.value }}</dd>
+
+          <dt>Membros família</dt>
+          <dd>{{ person.familyMembers or 0 }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- Benefício social -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        BENEFÍCIO SOCIAL
+        <span class="card-meta">receivesSocialBenefit</span>
+      </div>
+      <div class="card-body">
+        <dl class="dl">
+          <dt>Recebe benefício</dt>
+          <dd>
+            {% if person.receivesSocialBenefit %}
+              <span class="badge badge-yes">SIM</span>
+            {% else %}
+              <span class="badge badge-no">NÃO</span>
+            {% endif %}
+          </dd>
+          <dt>Descrição</dt>
+          <dd {% if not person.socialBenefitDescription %}class="null"{% endif %}>
+            {{ person.socialBenefitDescription or 'null' }}
+          </dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- Endereços -->
+    {% if person.addresses %}
+    <div class="card">
+      <div class="card-header">
+        ENDEREÇOS
+        <span class="card-meta">{{ person.addresses | length }} registro(s)</span>
+      </div>
+      <div class="card-body">
+        {% for addr in person.addresses %}
+          {% if not loop.first %}<hr class="rule">{% endif %}
+          <dl class="dl">
+            <dt>CEP</dt>
+            <dd><span class="uuid-chip">{{ addr.addressId }}</span></dd>
+            <dt>Logradouro</dt>
+            <dd>{{ addr.street }}, {{ addr.number }}{% if addr.complement %} — {{ addr.complement }}{% endif %}</dd>
+            <dt>Bairro</dt>
+            <dd>{{ addr.neighborhood }}</dd>
+            <dt>Cidade / UF</dt>
+            <dd>{{ addr.city }} — {{ addr.state }}</dd>
+            <dt>Complemento</dt>
+            <dd {% if not addr.complement %}class="null"{% endif %}>{{ addr.complement or 'null' }}</dd>
+          </dl>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <!-- Side column -->
+  <div>
+
+    <!-- Metadata -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">METADADOS</div>
+      <div class="card-body">
+        <dl class="dl">
+          <dt>Criado em</dt>
+          <dd style="font-family:'IBM Plex Mono',monospace; font-size:0.78rem;">
+            {{ person.createdAt}}
+          </dd>
+          <dt>Atualizado</dt>
+          <dd style="font-family:'IBM Plex Mono',monospace; font-size:0.78rem;">
+            {{ person.updatedAt}}
+          </dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<script>
+
+  document.addEventListener("DOMContentLoaded", () => {
+    openModal(
+      'error',
+      '{{ res.error.typeError }} · {{ res.error.statusCode }}',
+      '{{ res.error.errorName }}'
+    );
+  })
+
+</script>
+{% endif %}
+
+{% endblock %}

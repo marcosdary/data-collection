@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Nova Pessoa · People Manager{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+  <a href="/">Pessoas</a>
+  <span class="sep">/</span>
+  <span>Nova Pessoa</span>
+</div>
+
+<!-- Page header -->
+<div class="page-header">
+  <div>
+    <h1>NOVA PESSOA</h1>
+    <div class="meta">union_repository.insert_people(schema)</div>
+  </div>
+  <a href="/" class="btn btn-outline">← Cancelar</a>
+</div>
+
+{% if error %}
+<div class="alert">
+  <strong>Erro ao salvar:</strong><br>{{ error }}
+</div>
+{% endif %}
+
+<form method="POST" action="/people/new" autocomplete="off">
+  <div class="form-grid">
+
+    <!-- ── Dados pessoais ── -->
+    <div class="form-section">DADOS PESSOAIS</div>
+
+    <div class="form-group">
+      <label>Nome do Responsável Familiar *</label>
+      <input type="text" name="familyGuardianName" required
+        value="{{ form_data.get('familyGuardianName', '') }}"
+        placeholder="Nome completo">
+    </div>
+
+    <div class="form-group">
+      <label>Idade *</label>
+      <input type="number" name="age" required min="0" max="120"
+        value="{{ form_data.get('age', '') }}"
+        placeholder="Ex: 25">
+    </div>
+
+    <div class="form-group">
+      <label>Sexo *</label>
+      <select name="sex" required>
+        <option value="">Selecione…</option>
+        {% for s in sexes %}
+        <option value="{{ s }}" {% if form_data.get('sex') == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Raça *</label>
+      <select name="race" required>
+        <option value="">Selecione…</option>
+        {% for r in races %}
+        <option value="{{ r }}" {% if form_data.get('race') == r %}selected{% endif %}>{{ r }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Estado Civil *</label>
+      <select name="maritalStatus" required>
+        <option value="">Selecione…</option>
+        {% for m in marital %}
+        <option value="{{ m }}" {% if form_data.get('maritalStatus') == m %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Ocupação</label>
+      <input type="text" name="occupation"
+        value="{{ form_data.get('occupation', '') }}"
+        placeholder="Ex: Professora (deixe vazio para null)">
+    </div>
+
+    <div class="form-group">
+      <label>Nível de Escolaridade *</label>
+      <select name="educationLevel" required>
+        <option value="">Selecione…</option>
+        {% for e in educ %}
+        <option value="{{ e }}" {% if form_data.get('educationLevel') == e %}selected{% endif %}>
+          {{ e | replace('_', ' ') | title }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Tipo de Comunidade *</label>
+      <select name="communityType" required>
+        <option value="">Selecione…</option>
+        {% for c in comm %}
+        <option value="{{ c }}" {% if form_data.get('communityType') == c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Membros na família *</label>
+      <input type="number" name="familyMembers" required min="1"
+        value="{{ form_data.get('familyMembers', '1') }}"
+        placeholder="Ex: 4">
+    </div>
+
+    <!-- ── Benefício social ── -->
+    <div class="form-section">BENEFÍCIO SOCIAL</div>
+
+    <div class="form-group">
+      <label>Recebe benefício social? *</label>
+      <select name="receivesSocialBenefit" required id="sel-benefit">
+        <option value="false" {% if form_data.get('receivesSocialBenefit') != 'true' %}selected{% endif %}>NÃO</option>
+        <option value="true"  {% if form_data.get('receivesSocialBenefit') == 'true' %}selected{% endif %}>SIM</option>
+      </select>
+    </div>
+
+    <div class="form-group" id="benefit-desc-group"
+         style="{{ '' if form_data.get('receivesSocialBenefit') == 'true' else 'opacity:0.4; pointer-events:none;' }}">
+      <label>Descrição do benefício</label>
+      <input type="text" name="socialBenefitDescription"
+        value="{{ form_data.get('socialBenefitDescription', '') }}"
+        placeholder="Ex: Bolsa Família">
+      <div class="hint">Preencha apenas se receber benefício</div>
+    </div>
+
+    <!-- ── Endereço ── -->
+    <div class="form-section">ENDEREÇO</div>
+
+    <div class="form-group">
+      <label>ID do Endereço *</label>
+      <input type="text" name="addressId" required
+        value="{{ form_data.get('addressId', '') }}"
+        placeholder="Ex: 37031053">
+      <div class="hint">Identificador único do endereço no sistema</div>
+    </div>
+
+    <div class="form-group" style="grid-column: 1 / -1;">
+      <label>Logradouro *</label>
+      <input type="text" name="street" required
+        value="{{ form_data.get('street', '') }}"
+        placeholder="Ex: Rua Rosângela Santos Stecca">
+    </div>
+
+    <div class="form-group">
+      <label>Número *</label>
+      <input type="text" name="number" required
+        value="{{ form_data.get('number', '') }}"
+        placeholder="Ex: 229">
+    </div>
+
+    <div class="form-group">
+      <label>Complemento</label>
+      <input type="text" name="complement"
+        value="{{ form_data.get('complement', '') }}"
+        placeholder="Apto, bloco… (opcional)">
+    </div>
+
+    <div class="form-group">
+      <label>Bairro *</label>
+      <input type="text" name="neighborhood" required
+        value="{{ form_data.get('neighborhood', '') }}"
+        placeholder="Ex: Residencial Parque Imperador">
+    </div>
+
+    <div class="form-group">
+      <label>Cidade *</label>
+      <input type="text" name="city" required
+        value="{{ form_data.get('city', '') }}"
+        placeholder="Ex: Varginha">
+    </div>
+
+    <div class="form-group">
+      <label>Estado *</label>
+      <select name="state" required>
+        <option value="">Selecione…</option>
+        {% for s in stat %}
+        <option value="{{ s }}" {% if form_data.get('state') == s %}{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- ── Actions ── -->
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Salvar Pessoa
+      </button>
+      <a href="/" class="btn btn-outline">Cancelar</a>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:0.68rem; color:#8a857e; margin-left:auto;">
+        * campos obrigatórios
+      </span>
+    </div>
+
+  </div>
+</form>
+
+<script>
+const selBenefit = document.getElementById('sel-benefit');
+const benefitGroup = document.getElementById('benefit-desc-group');
+
+selBenefit.addEventListener('change', () => {
+  const show = selBenefit.value === 'true';
+  benefitGroup.style.opacity = show ? '1' : '0.4';
+  benefitGroup.style.pointerEvents = show ? 'auto' : 'none';
+});
+</script>
+
+{% endblock %}

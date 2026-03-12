@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Pessoas · People Manager{% endblock %}
+
+{% block content %}
+
+{% if res.success %}
+
+{% set people = res.data %}
+
+<!-- Page header -->
+<div class="page-header">
+  <div>
+    <h1>PESSOAS</h1>
+    <div class="meta">union_repository.get_all_people()</div>
+  </div>
+  <a href="/people/new" class="btn btn-primary">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Nova Pessoa
+  </a>
+</div>
+
+<!-- Stats -->
+<div class="stats-strip">
+  <div class="stat">
+    <div class="stat-label">Total de registros</div>
+    <div class="stat-value accent">{{ people | length }}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Recebem benefício social</div>
+    <div class="stat-value">{{ people | selectattr('receivesSocialBenefit') | list | length }}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Masculino</div>
+    <div class="stat-value">{{ people | selectattr('sex', 'equalto', 'MASCULINO') | list | length }}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Feminino</div>
+    <div class="stat-value">{{ people | selectattr('sex', 'equalto', 'FEMININO') | list | length }}</div>
+  </div>
+</div>
+
+{% if people %}
+<!-- Table -->
+<div class="table-wrap">
+  <table id="people-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Responsável familiar</th>
+        <th>Idade</th>
+        <th>Sexo</th>
+        <th>Raça</th>
+        <th>Estado civil</th>
+        <th>Comunidade</th>
+        <th>Cidade / UF</th>
+        <th>Benefício</th>
+        <th>Criado em</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in people %}
+      <tr data-search="{{ p.familyGuardianName }} {{ p.race }} {{ p.communityType }} {{ p.addresses[0].city if p.addresses else '' }}">
+        <td style="font-family:'IBM Plex Mono',monospace; font-size:0.65rem; color:#8a857e;">
+          {{ loop.index }}
+        </td>
+        <td class="td-main">{{ p.familyGuardianName }}</td>
+        <td>{{ p.age }} anos</td>
+        <td>
+          {% if p.sex.value == 'MASCULINO' %}
+            <span class="badge badge-m">M</span>
+          {% elif p.sex.value == 'FEMININO' %}
+            <span class="badge badge-f">F</span>
+          {% else %}
+            <span class="badge badge-o">{{ p.sex }}</span>
+          {% endif %}
+        </td>
+        <td>
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:#4a4640;">
+            {{ p.race.value }}
+          </span>
+        </td>
+        <td style="font-size:0.8rem;">{{ p.maritalStatus.value }}</td>
+        <td style="font-size:0.8rem;">{{ p.communityType.value }}</td>
+        <td>
+          {% if p.addresses %}
+            <span style="font-size:0.83rem;">{{ p.addresses[0].city }}</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:0.65rem; color:#8a857e; display:block;">
+              {{ p.addresses[0].state }}
+            </span>
+          {% else %}
+            <span style="color:#8a857e;">—</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if p.receivesSocialBenefit %}
+            <span class="badge badge-yes">SIM</span>
+          {% else %}
+            <span class="badge badge-no">NÃO</span>
+          {% endif %}
+        </td>
+        <td style="font-family:'IBM Plex Mono',monospace; font-size:0.68rem; color:#8a857e; white-space:nowrap;">
+          {{ p.createdAt }}
+        </td>
+        <td style="white-space:nowrap;">
+          <a href="/people/{{ p.peopleId }}" class="btn btn-outline btn-sm">Ver</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+<div class="empty">
+  <div class="empty-icon">◈</div>
+  <p>Nenhuma pessoa cadastrada.<br>Clique em "Nova Pessoa" para começar.</p>
+</div>
+{% endif %}
+
+{% else %}
+
+<div class="alert">
+  <strong>Erro ao salvar:</strong><br>{{ res.error.errorName }}
+</div>
+
+{% endif %}
+
+
+{% endblock %}
